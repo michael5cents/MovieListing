@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Official Network TV Schedules</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            font-weight: 300;
+        }
+        
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+        
+        .date-selector {
+            text-align: center;
+            padding: 1.5rem;
+            background: white;
+            margin: 1rem auto;
+            max-width: 600px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .date-selector input {
+            padding: 12px 16px;
+            font-size: 16px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            margin-right: 10px;
+        }
+        
+        .date-selector button {
+            padding: 12px 24px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        .date-selector button:hover {
+            background: #5a6fd8;
+        }
+        
+        .networks-container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            padding: 0 1rem;
+        }
+        
+        .network-card {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        
+        .network-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+        }
+        
+        .network-header {
+            padding: 1.5rem;
+            color: white;
+            font-weight: bold;
+            font-size: 1.2rem;
+            text-align: center;
+        }
+        
+        .nbc-header { background: linear-gradient(45deg, #0066cc, #004499); }
+        .abc-header { background: linear-gradient(45deg, #ff9933, #cc7700); }
+        .cbs-header { background: linear-gradient(45deg, #1e3a8a, #1e40af); }
+        .fox-header { background: linear-gradient(45deg, #dc2626, #991b1b); }
+        
+        .schedule-content {
+            padding: 1.5rem;
+            max-height: 600px;
+            overflow-y: auto;
+        }
+        
+        .time-slot {
+            display: flex;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .time-slot:last-child {
+            border-bottom: none;
+        }
+        
+        .time {
+            font-weight: bold;
+            color: #666;
+            min-width: 80px;
+            font-size: 0.9rem;
+        }
+        
+        .program {
+            flex: 1;
+            margin-left: 15px;
+        }
+        
+        .program-title {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 4px;
+        }
+        
+        .program-description {
+            color: #777;
+            font-size: 0.85rem;
+            line-height: 1.4;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 2rem;
+            color: #666;
+        }
+        
+        .error {
+            color: #dc2626;
+            background: #fef2f2;
+            padding: 1rem;
+            border-radius: 6px;
+            border-left: 4px solid #dc2626;
+        }
+        
+        .current-time {
+            background: linear-gradient(90deg, #f0f9ff, #e0f2fe);
+            border-left: 4px solid #0ea5e9;
+            border-radius: 4px;
+        }
+        
+        .verified-badge {
+            display: inline-block;
+            background: #10b981;
+            color: white;
+            font-size: 0.7rem;
+            padding: 2px 6px;
+            border-radius: 3px;
+            margin-left: 8px;
+        }
+        
+        .footer {
+            text-align: center;
+            padding: 2rem;
+            color: #666;
+            background: white;
+            margin-top: 3rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Official Network TV Schedules</h1>
+        <p>Accurate, date-driven schedules from official network sources</p>
+        <p id="current-time"></p>
+    </div>
+
+    <div class="date-selector">
+        <input type="date" id="schedule-date" value="">
+        <button onclick="loadSchedules()">Load Schedules</button>
+    </div>
+
+    <div class="networks-container">
+        <div class="network-card">
+            <div class="network-header nbc-header">
+                NBC <span class="verified-badge">OFFICIAL</span>
+            </div>
+            <div class="schedule-content" id="nbc-schedule">
+                <div class="loading">Click "Load Schedules" to fetch official NBC programming</div>
+            </div>
+        </div>
+
+        <div class="network-card">
+            <div class="network-header abc-header">
+                ABC <span class="verified-badge">OFFICIAL</span>
+            </div>
+            <div class="schedule-content" id="abc-schedule">
+                <div class="loading">Click "Load Schedules" to fetch official ABC programming</div>
+            </div>
+        </div>
+
+        <div class="network-card">
+            <div class="network-header cbs-header">
+                CBS <span class="verified-badge">OFFICIAL</span>
+            </div>
+            <div class="schedule-content" id="cbs-schedule">
+                <div class="loading">Click "Load Schedules" to fetch official CBS programming</div>
+            </div>
+        </div>
+
+        <div class="network-card">
+            <div class="network-header fox-header">
+                FOX <span class="verified-badge">OFFICIAL</span>
+            </div>
+            <div class="schedule-content" id="fox-schedule">
+                <div class="loading">Click "Load Schedules" to fetch official FOX programming</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>Schedule data sourced directly from official network websites</p>
+        <p>No fake or placeholder data - only verified programming information</p>
+    </div>
+
+    <script>
+        // Set today's date as default
+        document.getElementById('schedule-date').value = new Date().toISOString().split('T')[0];
+        
+        function updateCurrentTime() {
+            const now = new Date();
+            const options = {
+                timeZone: 'America/New_York', // Eastern Time for network schedules
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            };
+            document.getElementById('current-time').textContent = 
+                'Current Time (ET): ' + now.toLocaleString('en-US', options);
+        }
+
+        async function loadSchedules() {
+            const selectedDate = document.getElementById('schedule-date').value;
+            if (!selectedDate) {
+                alert('Please select a date');
+                return;
+            }
+
+            // Load each network's schedule
+            await Promise.all([
+                loadNetworkSchedule('nbc', selectedDate),
+                loadNetworkSchedule('abc', selectedDate),
+                loadNetworkSchedule('cbs', selectedDate),
+                loadNetworkSchedule('fox', selectedDate)
+            ]);
+        }
+
+        async function loadNetworkSchedule(network, date) {
+            const container = document.getElementById(`${network}-schedule`);
+            container.innerHTML = '<div class="loading">Loading official ' + network.toUpperCase() + ' schedule...</div>';
+
+            try {
+                const response = await fetch(`/api/schedule/${network}/${date}`);
+                const data = await response.json();
+
+                if (data.error) {
+                    throw new Error(data.error);
+                }
+
+                displaySchedule(container, data.schedule, network);
+            } catch (error) {
+                container.innerHTML = `
+                    <div class="error">
+                        <strong>Error loading ${network.toUpperCase()} schedule</strong><br>
+                        ${error.message}<br>
+                        <small>Only showing verified data from official sources</small>
+                    </div>
+                `;
+            }
+        }
+
+        function displaySchedule(container, schedule, network) {
+            if (!schedule || schedule.length === 0) {
+                container.innerHTML = '<div class="error">No verified schedule data available for this date</div>';
+                return;
+            }
+
+            container.innerHTML = '';
+            
+            schedule.forEach(program => {
+                const timeSlot = document.createElement('div');
+                timeSlot.className = 'time-slot';
+                
+                if (isCurrentTime(program.time)) {
+                    timeSlot.classList.add('current-time');
+                }
+
+                timeSlot.innerHTML = `
+                    <div class="time">${program.time}</div>
+                    <div class="program">
+                        <div class="program-title">${program.title}</div>
+                        <div class="program-description">${program.description}</div>
+                    </div>
+                `;
+                
+                container.appendChild(timeSlot);
+            });
+        }
+
+        function isCurrentTime(timeStr) {
+            const now = new Date();
+            const currentHour = now.getHours();
+            const programHour = parseTimeString(timeStr);
+            
+            return currentHour === programHour;
+        }
+
+        function parseTimeString(timeStr) {
+            const [time, period] = timeStr.split(' ');
+            let [hours] = time.split(':');
+            hours = parseInt(hours);
+            
+            if (period === 'AM' && hours === 12) {
+                hours = 0;
+            } else if (period === 'PM' && hours !== 12) {
+                hours += 12;
+            }
+            
+            return hours;
+        }
+
+        // Initialize the page
+        updateCurrentTime();
+        setInterval(updateCurrentTime, 1000);
+    </script>
+</body>
+</html>
