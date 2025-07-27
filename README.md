@@ -14,7 +14,7 @@ A professional movie listings website that displays current movies and showtimes
 
 - **AMC Dothan Pavilion 12** - Full showtimes via Gracenote API
 - **AMC Dothan 6** - Full showtimes via Gracenote API  
-- **Clark Cinemas - Enterprise** - Movie listings with contact info for showtimes
+- **Clark Cinemas - Enterprise** - Full movie listings with actual showtimes via web scraping
 
 ## Installation
 
@@ -70,10 +70,10 @@ The app is configured for zip code 36330 (Dothan, AL area). To change location:
 1. Update the zip code in the `get_gracenote_movies()` method
 2. Modify the Clark Cinemas URL if needed
 
-## Contact
+## Data Sources
 
-For Clark Cinemas showtimes: (334) 347-3811
-Website: https://enterprise.clarkcinemas.com
+- **AMC Theaters**: Real-time data via Gracenote TMS API
+- **Clark Cinemas**: Live showtimes scraped from https://enterprise.clarkcinemas.com
 
 ## License
 
